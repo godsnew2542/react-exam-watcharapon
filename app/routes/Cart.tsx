@@ -30,9 +30,28 @@ import {
 } from "@mui/icons-material";
 
 import { useCartStore } from "../store/cartStore";
+import { useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+
+interface CheckoutData {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+}
 
 const Cart: React.FC = () => {
-  const { items, addToCart, updateQuantity, removeFromCart } = useCartStore();
+  const { items, addToCart, updateQuantity, removeFromCart, clearCart } =
+    useCartStore();
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CheckoutData>();
 
   // TODO: Students should manage these with Zustand and React Hook Form
   const [openCheckout, setOpenCheckout] = React.useState(false);
@@ -42,7 +61,6 @@ const Cart: React.FC = () => {
   //   // Example: { productId: '1', product: {...}, quantity: 2 }
   // ] as any[];
   const mockCartItems = items;
-  console.log("🚀 ~ Cart ~ mockCartItems:", mockCartItems);
 
   // TODO: Students should calculate totals
   const subtotal = items.reduce(
@@ -52,6 +70,23 @@ const Cart: React.FC = () => {
   const shipping = 50;
   const total = subtotal + shipping;
 
+  const onSubmit = (data: CheckoutData) => {
+    console.log("🚀 ~ onSubmit ~ data:", data);
+    // แสดง alert ว่าสั่งซื้อสำเร็จ
+    alert("สั่งซื้อสำเร็จ! ขอบคุณสำหรับการสั่งซื้อ");
+    clearCart();
+    reset();
+    setOpenCheckout(false);
+    // navigate ไปหน้า Products
+    navigate("/");
+
+    // addTask({
+    //   ...data,
+    //   completed: false,
+    // });
+    // reset();
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
@@ -60,6 +95,7 @@ const Cart: React.FC = () => {
           startIcon={<ArrowBack />}
           onClick={() => {
             // TODO: Students should implement navigation back to products
+            navigate("/");
           }}
           sx={{ mr: 2 }}
         >
@@ -157,6 +193,10 @@ const Cart: React.FC = () => {
                               size="small"
                               onClick={() => {
                                 // TODO: Students should implement decrease quantity
+                                updateQuantity(
+                                  item.product.id,
+                                  item.quantity - 1
+                                );
                               }}
                             >
                               <Remove />
@@ -177,6 +217,10 @@ const Cart: React.FC = () => {
                               size="small"
                               onClick={() => {
                                 // TODO: Students should implement increase quantity
+                                updateQuantity(
+                                  item.product.id,
+                                  item.quantity + 1
+                                );
                               }}
                             >
                               <Add />
@@ -281,83 +325,108 @@ const Cart: React.FC = () => {
 
         <DialogContent>
           {/* TODO: Students should implement React Hook Form here */}
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label="Full Name"
-                variant="outlined"
-                required
-              />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  variant="outlined"
+                  error={!!errors.fullName}
+                  helperText={errors.fullName?.message}
+                  {...register("fullName", {
+                    required: "กรุณากรอกชื่อ-นามสกุล",
+                  })}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  type="email"
+                  variant="outlined"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  {...register("email", {
+                    required: "กรุณากรอก email ให้ถูกต้อง",
+                  })}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  variant="outlined"
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message}
+                  {...register("phone", {
+                    required: "กรุณากรอกเบอร์โทรศัพท์",
+                  })}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="Address"
+                  multiline
+                  rows={3}
+                  variant="outlined"
+                  error={!!errors.address}
+                  helperText={errors.address?.message}
+                  {...register("address", {
+                    required: "กรุณากรอกที่อยู่",
+                  })}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="City"
+                  variant="outlined"
+                  error={!!errors.city}
+                  helperText={errors.city?.message}
+                  {...register("city", {
+                    required: "กรุณากรอกจังหวัด",
+                  })}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Postal Code"
+                  variant="outlined"
+                  error={!!errors.postalCode}
+                  helperText={errors.postalCode?.message}
+                  {...register("postalCode", {
+                    required: "กรุณากรอกรหัสไปรษณีย์ 5 หลัก",
+                  })}
+                />
+              </Grid>
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                variant="outlined"
-                required
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label="Phone Number"
-                variant="outlined"
-                required
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label="Address"
-                multiline
-                rows={3}
-                variant="outlined"
-                required
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="City" variant="outlined" required />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label="Postal Code"
-                variant="outlined"
-                required
-              />
-            </Grid>
-          </Grid>
-
-          {/* Order Summary in Dialog */}
-          <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.50" }}>
-            <Typography variant="h6" gutterBottom>
-              Order Summary
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography>Total Amount:</Typography>
-              <Typography variant="h6" color="primary">
-                ฿{total.toLocaleString()}
+            {/* Order Summary in Dialog */}
+            <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.50" }}>
+              <Typography variant="h6" gutterBottom>
+                Order Summary
               </Typography>
-            </Box>
-          </Paper>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography>Total Amount:</Typography>
+                <Typography variant="h6" color="primary">
+                  ฿{total.toLocaleString()}
+                </Typography>
+              </Box>
+            </Paper>
+          </form>
         </DialogContent>
 
         <DialogActions>
           <Button onClick={() => setOpenCheckout(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              // TODO: Students should implement order submission
-              setOpenCheckout(false);
-            }}
-          >
+          <Button variant="contained" onClick={handleSubmit(onSubmit)}>
             Place Order
           </Button>
         </DialogActions>

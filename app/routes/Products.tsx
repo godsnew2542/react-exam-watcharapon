@@ -20,11 +20,13 @@ import { Add, Remove, ShoppingCart, FilterList } from "@mui/icons-material";
 
 import { useProductStore } from "../store/productStore";
 import { useCartStore } from "../store/cartStore";
+import { useNavigate } from "react-router";
 
 const Products: React.FC = () => {
   // const { products, loadProducts, getProductsByCategory, sortProducts } =useProductStore();
   const { products, getProductsByCategory } = useProductStore();
   const { items, addToCart, updateQuantity, removeFromCart } = useCartStore();
+  const navigate = useNavigate();
 
   // TODO: Students should get data from Zustand store
   const [category, setCategory] = React.useState("all");
@@ -63,6 +65,7 @@ const Products: React.FC = () => {
             startIcon={<ShoppingCart />}
             onClick={() => {
               // TODO: Students should implement navigation to cart
+              navigate("/cart");
             }}
           >
             View Cart
